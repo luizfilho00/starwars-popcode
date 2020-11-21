@@ -2,6 +2,7 @@ package br.com.mouzinho.starwarspopcode.ui.view
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import br.com.mouzinho.starwarspopcode.R
 import br.com.mouzinho.starwarspopcode.databinding.ActivityMainBinding
 import br.com.mouzinho.starwarspopcode.ui.navigation.Navigator
 import br.com.mouzinho.starwarspopcode.ui.util.SchedulerProvider
@@ -57,6 +58,7 @@ class MainActivity : AppCompatActivity() {
                     addToBackStack(action.fragment.javaClass.simpleName)
                 }
             }
+            .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_right)
             .commit()
     }
 
