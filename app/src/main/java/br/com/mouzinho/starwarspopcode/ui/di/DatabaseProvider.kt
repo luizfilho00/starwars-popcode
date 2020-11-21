@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
 import io.realm.Realm
+import io.realm.RealmConfiguration
 import javax.inject.Singleton
 
 @Module
@@ -13,5 +14,5 @@ object DatabaseProvider {
 
     @Provides
     @Singleton
-    fun providesRealm(): Realm = Realm.getDefaultInstance()
+    fun providesRealm(): Realm = Realm.getInstance(RealmConfiguration.Builder().deleteRealmIfMigrationNeeded().build())
 }

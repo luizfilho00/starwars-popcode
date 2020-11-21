@@ -16,7 +16,8 @@ open class DbPeople(
     var birthYear: String = UNKNOWN,
     var gender: String = UNKNOWN,
     var planet: String = UNKNOWN,
-    var specie: String = UNKNOWN
+    var specie: String = UNKNOWN,
+    var favorite: Boolean = false
 ) : RealmObject() {
 
     fun toPeople() = People(
@@ -32,9 +33,11 @@ open class DbPeople(
     )
 
     companion object {
+        const val FIELD_FAVORITE = "favorite"
         private const val UNKNOWN = "Unknown"
 
         fun fromPeople(people: People) = DbPeople(
+            id = people.id,
             name = people.name,
             height = people.height,
             mass = people.mass,

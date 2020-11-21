@@ -6,7 +6,9 @@ import br.com.mouzinho.starwarspopcode.R
 import br.com.mouzinho.starwarspopcode.databinding.ActivityMainBinding
 import br.com.mouzinho.starwarspopcode.ui.navigation.Navigator
 import br.com.mouzinho.starwarspopcode.ui.util.SchedulerProvider
+import br.com.mouzinho.starwarspopcode.ui.view.favorites.FavoritesFragment
 import br.com.mouzinho.starwarspopcode.ui.view.people.PeopleFragment
+import com.pandora.bottomnavigator.BottomNavigator
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -20,18 +22,37 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var firstFragment = true
     private val disposables = CompositeDisposable()
+    private lateinit var navigator: BottomNavigator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setupNavigation()
         setupUi()
-        Navigator.push(PeopleFragment())
     }
 
     override fun onDestroy() {
         super.onDestroy()
         disposables.clear()
+    }
+
+    override fun onBackPressed() {
+        if (!navigator.pop())
+            super.onBackPressed()
+    }
+
+    private fun setupNavigation() {
+        navigator = BottomNavigator.onCreate(
+            fragmentContainer = binding.frameLayoutContainer.id,
+            bottomNavigationView = binding.bottomNavigation,
+            rootFragmentsFactory = mapOf(
+                R.id.action_people to { PeopleFragment() },
+                R.id.action_favorites to { FavoritesFragment() }
+            ),
+            defaultTab = R.id.action_people,
+            activity = this
+        )
     }
 
     private fun setupUi() {
