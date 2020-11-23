@@ -6,6 +6,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import br.com.mouzinho.starwarspopcode.domain.entity.People
 import br.com.mouzinho.starwarspopcode.domain.repository.PeopleRepository
+import br.com.mouzinho.starwarspopcode.domain.useCase.UpdateFavorite
 import br.com.mouzinho.starwarspopcode.ui.util.DispatcherProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -14,7 +15,8 @@ import kotlinx.coroutines.launch
 
 class FavoritesViewModel @ViewModelInject constructor(
     private val repository: PeopleRepository,
-    private val dispatcherProvider: DispatcherProvider
+    private val dispatcherProvider: DispatcherProvider,
+    private val updateFavorite: UpdateFavorite
 ) : ViewModel() {
     val favorites by lazy { _favorites.asSharedFlow() }
 
@@ -36,7 +38,7 @@ class FavoritesViewModel @ViewModelInject constructor(
 
     fun onRemoveFavorite(people: People) {
         viewModelScope.launch(dispatcherProvider.io()) {
-            repository.updatePeople(people.copy(favorite = false))
+            updateFavorite.execute(people)
             reloadFavorites()
         }
     }

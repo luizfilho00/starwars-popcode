@@ -13,6 +13,7 @@ import br.com.mouzinho.starwarspopcode.data.paging.PagingDataSource
 import br.com.mouzinho.starwarspopcode.data.paging.PeopleBoundaryCallback
 import br.com.mouzinho.starwarspopcode.domain.entity.People
 import br.com.mouzinho.starwarspopcode.domain.repository.PeopleRepository
+import br.com.mouzinho.starwarspopcode.domain.useCase.UpdateFavorite
 import br.com.mouzinho.starwarspopcode.ui.util.DispatcherProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -25,7 +26,8 @@ class PeopleViewModel @ViewModelInject constructor(
     private val peopleDao: DbPeopleDao,
     private val remoteKeyDao: DbRemoteKeyDao,
     private val apiService: ApiService,
-    private val repository: PeopleRepository
+    private val repository: PeopleRepository,
+    private val updateFavorite: UpdateFavorite
 ) : ViewModel() {
     val favoriteObservable: SharedFlow<Boolean> by lazy { favoritePublisher.asSharedFlow() }
     val loadingObservable: SharedFlow<Boolean> by lazy { loadingPublisher.asSharedFlow() }
@@ -41,12 +43,11 @@ class PeopleViewModel @ViewModelInject constructor(
             setBoundaryCallback(PeopleBoundaryCallback(viewModelScope, loadingPublisher, apiService, peopleDao, remoteKeyDao))
         }.build()
 
-    fun updateFavorite(people: People) =
+    fun updateFavorite(people: People) {
         viewModelScope.launch(dispatcherProvider.io()) {
-            val isFavorite = !people.favorite
-            repository.updatePeople(people.copy(favorite = isFavorite))
-            favoritePublisher.emit(isFavorite)
+            favoritePublisher.emit(updateFavorite.execute(people))
         }
+    }
 
     fun onSearch(text: String) {
         pagingDataSource.query = text

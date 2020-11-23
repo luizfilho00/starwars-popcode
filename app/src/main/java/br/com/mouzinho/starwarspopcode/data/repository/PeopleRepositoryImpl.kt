@@ -26,6 +26,10 @@ class PeopleRepositoryImpl @Inject constructor(
         peopleDao.updatePeople(DbPeople.fromPeople(people))
     }
 
+    override suspend fun getPeopleById(id: String): People? {
+        return peopleDao.getPeopleById(id).firstOrNull()?.toPeople()
+    }
+
     override fun loadAllFavorites(): LiveData<List<People>> {
         return Transformations.map(peopleDao.getAllFavorites()) { list ->
             list.map { it.toPeople() }

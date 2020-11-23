@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import br.com.mouzinho.starwarspopcode.R
 import br.com.mouzinho.starwarspopcode.databinding.FragmentPeopleEpoxyBinding
 import br.com.mouzinho.starwarspopcode.domain.entity.People
+import br.com.mouzinho.starwarspopcode.ui.base.ScrollableFragment
 import br.com.mouzinho.starwarspopcode.ui.navigation.Navigator
 import br.com.mouzinho.starwarspopcode.ui.view.MainViewModel
 import br.com.mouzinho.starwarspopcode.ui.view.details.PeopleDetailsFragment
@@ -21,7 +22,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
-class PeopleFragment : Fragment() {
+class PeopleFragment : Fragment(), ScrollableFragment {
     private var binding: FragmentPeopleEpoxyBinding? = null
     private val viewModel by viewModels<PeopleViewModel>()
     private val activityViewModel by activityViewModels<MainViewModel>()
@@ -41,6 +42,10 @@ class PeopleFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         binding = null
+    }
+
+    override fun scrollToTop() {
+        binding?.recyclerView?.smoothScrollToPosition(0)
     }
 
     private fun onPeopleClick(people: People) {
