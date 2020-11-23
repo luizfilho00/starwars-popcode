@@ -1,11 +1,12 @@
 package br.com.mouzinho.starwarspopcode.ui.di
 
+import android.content.Context
+import br.com.mouzinho.starwarspopcode.ui.model.AppDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
-import io.realm.Realm
-import io.realm.RealmConfiguration
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Singleton
 
 @Module
@@ -14,5 +15,13 @@ object DatabaseProvider {
 
     @Provides
     @Singleton
-    fun providesRealm(): Realm = Realm.getInstance(RealmConfiguration.Builder().deleteRealmIfMigrationNeeded().build())
+    fun providesDatabase(@ApplicationContext context: Context) = AppDatabase.build(context)
+
+    @Provides
+    @Singleton
+    fun providesPeopleDao(database: AppDatabase) = database.peopleDao()
+
+    @Provides
+    @Singleton
+    fun providesRemoteKeyDao(database: AppDatabase) = database.remoteKeyDao()
 }

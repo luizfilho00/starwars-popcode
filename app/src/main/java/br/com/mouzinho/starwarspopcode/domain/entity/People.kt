@@ -1,9 +1,9 @@
 package br.com.mouzinho.starwarspopcode.domain.entity
 
-import java.util.*
+import java.io.Serializable
 
 data class People(
-    val id: String = UUID.randomUUID().toString(),
+    val id: String,
     val name: String,
     val height: String,
     val mass: String,
@@ -12,5 +12,12 @@ data class People(
     val birthYear: String,
     val gender: String,
     val planet: String,
-    val specie: String
-)
+    val species: List<String>,
+    val speciesNames: String = UNKOWN,
+    var favorite: Boolean = false
+) : Serializable {
+
+    companion object {
+        private const val UNKOWN = "Unknown"
+    }
+}

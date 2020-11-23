@@ -31,6 +31,7 @@ data class ApiPeople(
 ) {
 
     fun toPeople() = People(
+        id = name + created?.time?.toString(),
         name = name ?: throw NullPointerException("Nome não pode ser null"),
         height = if (height.isNullOrEmpty()) "" else height,
         mass = if (mass.isNullOrEmpty()) UNKNOWN else mass,
@@ -38,8 +39,8 @@ data class ApiPeople(
         skinColor = if (skinColor.isNullOrEmpty()) UNKNOWN else skinColor,
         birthYear = if (birthYear.isNullOrEmpty()) UNKNOWN else birthYear,
         gender = if (gender.isNullOrEmpty()) UNKNOWN else gender,
-        planet = UNKNOWN, //TODO -> Chamada api para pegar
-        specie = UNKNOWN //TODO -> Chamada api para pegar
+        planet = homeworld ?: "",
+        species = species ?: emptyList()
     )
 
     companion object {

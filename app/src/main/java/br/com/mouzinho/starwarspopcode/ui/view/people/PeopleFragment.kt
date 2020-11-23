@@ -4,59 +4,75 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
-import androidx.core.view.isVisible
+import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import br.com.mouzinho.starwarspopcode.R
-import br.com.mouzinho.starwarspopcode.databinding.FragmentPeopleBinding
-import br.com.mouzinho.starwarspopcode.ui.util.BaseFragment
+import br.com.mouzinho.starwarspopcode.databinding.FragmentPeopleEpoxyBinding
+import br.com.mouzinho.starwarspopcode.domain.entity.People
+import br.com.mouzinho.starwarspopcode.ui.navigation.Navigator
+import br.com.mouzinho.starwarspopcode.ui.view.details.PeopleDetailsFragment
 import dagger.hilt.android.AndroidEntryPoint
-import io.reactivex.rxkotlin.addTo
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
-class PeopleFragment : BaseFragment() {
+class PeopleFragment : Fragment() {
+    private var binding: FragmentPeopleEpoxyBinding? = null
     private val viewModel by viewModels<PeopleViewModel>()
-    private lateinit var binding: FragmentPeopleBinding
-    private lateinit var adapter: PeopleAdapter
+    private val epoxyController by lazy { PeoplePagingController(::onPeopleClick, ::onFavoriteClick) }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        binding = FragmentPeopleBinding.inflate(inflater, container, false)
-        return binding.root
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        binding = FragmentPeopleEpoxyBinding.inflate(inflater, container, false)
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupRecyclerView()
+        setupEpoxy()
         subscribeUi()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.recyclerView.adapter = null
+        binding = null
     }
 
-    private fun subscribeUi() {
-        with(viewModel) {
-            peopleObservable.subscribe { adapter.submitData(lifecycle, it) }.addTo(disposables)
-            loadingObservable.subscribe { binding.layoutProgress.isVisible = it }.addTo(disposables)
-            errorObservable.subscribe(::showError).addTo(disposables)
+    private fun onPeopleClick(people: People) {
+        lifecycleScope.launchWhenStarted {
+            Navigator.push(PeopleDetailsFragment.newInstance(people))
         }
     }
 
-    private fun showError(message: String) {
-        AlertDialog.Builder(requireContext())
-            .setMessage(message)
-            .setPositiveButton(R.string.ok) { dialog, _ -> dialog.dismiss() }
-            .setCancelable(true)
-            .show()
+    private fun subscribeUi() {
+        viewModel.peopleLiveData.observe(viewLifecycleOwner) { epoxyController.submitList(it) }
+        lifecycleScope.launchWhenStarted {
+            awaitAll(
+                async { viewModel.loadingObservable.collect { epoxyController.isLoading = it } },
+                async {
+                    viewModel.favoriteObservable.collect { favorited ->
+                        Toast.makeText(
+                            requireContext(),
+                            if (favorited) R.string.favorite_saved_msg else R.string.favorite_removed_msg,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            )
+        }
     }
 
-    private fun setupRecyclerView() {
-        if (!::adapter.isInitialized) adapter = PeopleAdapter()
-        binding.recyclerView.adapter = adapter.withLoadStateFooter(PeopleLoadStateAdapter())
+    private fun onFavoriteClick(people: People) {
+        viewModel.updateFavorite(people)
     }
+
+    private fun setupEpoxy() {
+        binding?.recyclerView?.run {
+            adapter = epoxyController.adapter
+            setRemoveAdapterWhenDetachedFromWindow(true)
+        }
+    }
+
 }

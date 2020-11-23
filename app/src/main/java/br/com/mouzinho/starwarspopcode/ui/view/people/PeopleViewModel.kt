@@ -1,49 +1,55 @@
 package br.com.mouzinho.starwarspopcode.ui.view.people
 
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.rxjava2.observable
-import br.com.mouzinho.starwarspopcode.data.paging.PeopleDataSource
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
+import br.com.mouzinho.starwarspopcode.data.dao.DbPeopleDao
+import br.com.mouzinho.starwarspopcode.data.dao.DbRemoteKeyDao
+import br.com.mouzinho.starwarspopcode.data.network.ApiService
+import br.com.mouzinho.starwarspopcode.data.paging.PagingDataSource
+import br.com.mouzinho.starwarspopcode.data.paging.PeopleBoundaryCallback
 import br.com.mouzinho.starwarspopcode.domain.entity.People
-import br.com.mouzinho.starwarspopcode.ui.util.BaseViewModel
-import br.com.mouzinho.starwarspopcode.ui.util.Constants
-import br.com.mouzinho.starwarspopcode.ui.util.SchedulerProvider
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.subjects.PublishSubject
+import br.com.mouzinho.starwarspopcode.domain.repository.PeopleRepository
+import br.com.mouzinho.starwarspopcode.ui.util.DispatcherProvider
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 
 class PeopleViewModel @ViewModelInject constructor(
-    private val schedulerProvider: SchedulerProvider,
-    private val peopleDataSource: PeopleDataSource
-) : BaseViewModel() {
-    val peopleObservable: Observable<PagingData<People>> by lazy { peoplePublisher.hide() }
-    val loadingObservable: Observable<Boolean> by lazy { loadingPublisher.hide() }
-    val errorObservable: Observable<String> by lazy { errorPublisher.hide() }
+    private val dispatcherProvider: DispatcherProvider,
+    private val pagingDataSource: PagingDataSource,
+    private val peopleDao: DbPeopleDao,
+    private val remoteKeyDao: DbRemoteKeyDao,
+    private val apiService: ApiService,
+    private val repository: PeopleRepository
+) : ViewModel() {
+    val favoriteObservable: SharedFlow<Boolean> by lazy { favoritePublisher.asSharedFlow() }
+    val loadingObservable: SharedFlow<Boolean> by lazy { loadingPublisher.asSharedFlow() }
 
-    private val peoplePublisher by lazy { PublishSubject.create<PagingData<People>>() }
-    private val loadingPublisher by lazy { PublishSubject.create<Boolean>() }
-    private val errorPublisher by lazy { PublishSubject.create<String>() }
+    private val favoritePublisher by lazy { MutableSharedFlow<Boolean>() }
+    private val loadingPublisher by lazy { MutableSharedFlow<Boolean>() }
 
-    init {
-        observeInitialPageLoading()
-        observePagingData()
-    }
+    val peopleLiveData: LiveData<PagedList<People>> =
+        LivePagedListBuilder(
+            peopleDao.getAllPeople().map { it.toPeople() },
+            PagedList.Config.Builder().setEnablePlaceholders(false).setPageSize(10).build()
+        ).apply {
+            setBoundaryCallback(PeopleBoundaryCallback(viewModelScope, loadingPublisher, apiService, peopleDao, remoteKeyDao))
+        }.build()
 
-    private fun observeInitialPageLoading() {
-        peopleDataSource
-            .initialLoadingObservable
-            .observeOn(schedulerProvider.ui())
-            .subscribe(loadingPublisher::onNext)
-            .addTo(disposables)
-    }
+    fun updateFavorite(people: People) =
+        viewModelScope.launch(dispatcherProvider.io()) {
+            val isFavorite = !people.favorite
+            repository.updatePeople(people.copy(favorite = isFavorite))
+            favoritePublisher.emit(isFavorite)
+        }
 
-    private fun observePagingData() {
-        Pager(PagingConfig(10, enablePlaceholders = false)) { peopleDataSource }
-            .observable
-            .observeOn(schedulerProvider.ui())
-            .subscribe(peoplePublisher::onNext) { errorPublisher.onNext(it.message ?: Constants.defaultErrorMessage) }
-            .addTo(disposables)
+    fun onSearch(text: String) {
+        pagingDataSource.query = text
+//        pagingSource.invalidate()
     }
 }

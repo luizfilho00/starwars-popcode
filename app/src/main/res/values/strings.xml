@@ -2,4 +2,7 @@
     <string name="app_name">starwarspopcode</string>
     <string name="ok">Ok</string>
     <string name="you_dont_have_favorites_yet">You dont have favorites yet!</string>
+    <string name="favorite_saved_msg">May the force be with you</string>
+    <string name="favorite_removed_msg">Wait for my revenge young padawan</string>
+    <string name="error_message">Only at the end do you realize the power of the Dark Side.</string>
 </resources>

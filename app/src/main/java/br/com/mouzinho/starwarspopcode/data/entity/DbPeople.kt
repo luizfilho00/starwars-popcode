@@ -1,26 +1,28 @@
 package br.com.mouzinho.starwarspopcode.data.entity
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import br.com.mouzinho.starwarspopcode.domain.entity.People
-import io.realm.RealmObject
-import io.realm.annotations.PrimaryKey
 import java.util.*
 
-open class DbPeople(
+@Entity
+data class DbPeople(
     @PrimaryKey
-    var id: String = UUID.randomUUID().toString(),
-    var name: String = UNKNOWN,
-    var height: String = UNKNOWN,
-    var mass: String = UNKNOWN,
-    var hairColor: String = UNKNOWN,
-    var skinColor: String = UNKNOWN,
-    var birthYear: String = UNKNOWN,
-    var gender: String = UNKNOWN,
-    var planet: String = UNKNOWN,
-    var specie: String = UNKNOWN,
-    var favorite: Boolean = false
-) : RealmObject() {
-
+    val id: String,
+    val name: String,
+    val height: String,
+    val mass: String,
+    val hairColor: String,
+    val skinColor: String,
+    val birthYear: String,
+    val gender: String,
+    val planetUrl: String,
+    val speciesUrl: List<String>,
+    val createdAt: Long,
+    val isFavorite: Boolean
+) {
     fun toPeople() = People(
+        id = id,
         name = name,
         height = height,
         mass = mass,
@@ -28,14 +30,12 @@ open class DbPeople(
         skinColor = skinColor,
         birthYear = birthYear,
         gender = gender,
-        planet = planet,
-        specie = specie
+        planet = planetUrl,
+        species = speciesUrl,
+        favorite = isFavorite
     )
 
     companion object {
-        const val FIELD_FAVORITE = "favorite"
-        private const val UNKNOWN = "Unknown"
-
         fun fromPeople(people: People) = DbPeople(
             id = people.id,
             name = people.name,
@@ -45,8 +45,10 @@ open class DbPeople(
             skinColor = people.skinColor,
             birthYear = people.birthYear,
             gender = people.gender,
-            planet = people.planet,
-            specie = people.specie
+            planetUrl = people.planet,
+            speciesUrl = people.species,
+            createdAt = Date().time,
+            isFavorite = people.favorite
         )
     }
 }

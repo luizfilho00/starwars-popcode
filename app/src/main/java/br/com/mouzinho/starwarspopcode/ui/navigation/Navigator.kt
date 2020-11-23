@@ -1,7 +1,7 @@
 package br.com.mouzinho.starwarspopcode.ui.navigation
 
 import androidx.fragment.app.Fragment
-import com.jakewharton.rxrelay2.PublishRelay
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 object Navigator {
     sealed class NavAction {
@@ -10,11 +10,11 @@ object Navigator {
         object PopUp : NavAction()
     }
 
-    val navObservable = PublishRelay.create<NavAction>()
+    val navObservable = MutableSharedFlow<NavAction>()
 
-    fun popUp() = navObservable.accept(NavAction.PopUp)
+    suspend fun popUp() = navObservable.emit(NavAction.PopUp)
 
-    fun push(fragment: Fragment) = navObservable.accept(NavAction.Push(fragment))
+    suspend fun push(fragment: Fragment) = navObservable.emit(NavAction.Push(fragment))
 
-    fun popUpTo(fragment: Fragment) = navObservable.accept(NavAction.PopUpTo(fragment))
+    suspend fun popUpTo(fragment: Fragment) = navObservable.emit(NavAction.PopUpTo(fragment))
 }

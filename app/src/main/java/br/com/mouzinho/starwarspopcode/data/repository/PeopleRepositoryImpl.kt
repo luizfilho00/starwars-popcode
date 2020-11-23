@@ -1,58 +1,34 @@
 package br.com.mouzinho.starwarspopcode.data.repository
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Transformations
+import br.com.mouzinho.starwarspopcode.data.dao.DbPeopleDao
 import br.com.mouzinho.starwarspopcode.data.entity.DbPeople
 import br.com.mouzinho.starwarspopcode.data.network.ApiService
 import br.com.mouzinho.starwarspopcode.domain.entity.People
 import br.com.mouzinho.starwarspopcode.domain.repository.PeopleRepository
-import io.reactivex.Single
-import io.realm.Realm
-import io.realm.kotlin.where
 import javax.inject.Inject
 
 class PeopleRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
-    private val realm: Realm
+    private val peopleDao: DbPeopleDao,
 ) : PeopleRepository {
 
-    override fun loadPlanetName(url: String): Single<String> {
-        return apiService.getPlanetName(url).map { it.name ?: "" }
+    override suspend fun loadPlanetName(url: String): String {
+        return apiService.getPlanetName(url).name ?: ""
     }
 
-    override fun loadSpecieName(url: String): Single<String> {
-        return Single.just("")
+    override suspend fun loadSpecieName(url: String): String {
+        return ""
     }
 
-    override fun loadAllFromDb(): List<People> {
-        return realm.where<DbPeople>()
-            .findAll()
-            .filter { it.isLoaded }
-            .map { it.toPeople() }
+    override suspend fun updatePeople(people: People) {
+        peopleDao.updatePeople(DbPeople.fromPeople(people))
     }
 
-    override fun savePeopleListIntoDb(list: List<People>) {
-        return realm.executeTransaction { realm ->
-            realm.copyToRealmOrUpdate(list.map(DbPeople::fromPeople))
+    override fun loadAllFavorites(): LiveData<List<People>> {
+        return Transformations.map(peopleDao.getAllFavorites()) { list ->
+            list.map { it.toPeople() }
         }
-    }
-
-    override fun saveAsFavorite(people: People) {
-        realm.executeTransaction { realm ->
-            realm.copyToRealmOrUpdate(DbPeople.fromPeople(people).apply { favorite = true })
-        }
-    }
-
-    override fun removeFromFavorites(people: People) {
-        realm.executeTransaction { realm ->
-            realm.copyToRealmOrUpdate(DbPeople.fromPeople(people).apply { favorite = false })
-        }
-    }
-
-    override fun loadAllFavorites(): List<People> {
-        return realm
-            .where<DbPeople>()
-            .equalTo(DbPeople.FIELD_FAVORITE, true)
-            .findAll()
-            .filter { it.isLoaded }
-            .map { it.toPeople() }
     }
 }
