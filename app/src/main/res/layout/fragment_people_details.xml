@@ -2,6 +2,12 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+        <variable
+            name="people"
+            type="br.com.mouzinho.starwarspopcode.domain.entity.People" />
+    </data>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -25,6 +31,7 @@
                     android:padding="16dp"
                     android:textColor="#000"
                     android:textSize="16sp"
+                    android:text="@{`Nome: ` + people.name}"
                     tools:text="Banana" />
 
                 <TextView
@@ -34,6 +41,7 @@
                     android:padding="16dp"
                     android:textColor="#000"
                     android:textSize="16sp"
+                    android:text="@{`Altura: ` + people.height}"
                     tools:text="Banana" />
 
                 <TextView
@@ -43,6 +51,7 @@
                     android:padding="16dp"
                     android:textColor="#000"
                     android:textSize="16sp"
+                    android:text="@{`Cor da pele: ` + people.skinColor}"
                     tools:text="Banana" />
 
                 <TextView
@@ -52,6 +61,7 @@
                     android:padding="16dp"
                     android:textColor="#000"
                     android:textSize="16sp"
+                    android:text="@{`Peso: ` + people.mass}"
                     tools:text="Banana" />
 
                 <TextView
@@ -61,6 +71,7 @@
                     android:padding="16dp"
                     android:textColor="#000"
                     android:textSize="16sp"
+                    android:text="@{`Cor do cabelo: ` + people.hairColor}"
                     tools:text="Banana" />
 
                 <TextView
@@ -70,6 +81,7 @@
                     android:padding="16dp"
                     android:textColor="#000"
                     android:textSize="16sp"
+                    android:text="@{`Nascimento: ` + people.birthYear}"
                     tools:text="Banana" />
 
                 <TextView
@@ -79,6 +91,7 @@
                     android:padding="16dp"
                     android:textColor="#000"
                     android:textSize="16sp"
+                    android:text="@{`Gênero: ` + people.gender}"
                     tools:text="Banana" />
 
                 <TextView
@@ -88,6 +101,7 @@
                     android:padding="16dp"
                     android:textColor="#000"
                     android:textSize="16sp"
+                    android:text="@{`Planeta natal: ` + people.planet}"
                     tools:text="Banana" />
 
                 <TextView
@@ -97,6 +111,7 @@
                     android:padding="16dp"
                     android:textColor="#000"
                     android:textSize="16sp"
+                    android:text="@{`Espécie: ` + people.speciesNames}"
                     tools:text="Banana" />
             </LinearLayout>
 

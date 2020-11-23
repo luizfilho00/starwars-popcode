@@ -5,8 +5,8 @@
     <data>
 
         <variable
-            name="name"
-            type="String" />
+            name="people"
+            type="br.com.mouzinho.starwarspopcode.domain.entity.People" />
 
         <variable
             name="favorited"
@@ -28,17 +28,53 @@
         android:onClick="@{onViewClickListener}"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/text_view_name"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:padding="16dp"
             android:layout_alignParentStart="true"
             android:layout_centerInParent="true"
-            android:padding="16dp"
-            android:textColor="#000"
-            android:textSize="16sp"
-            android:text="@{name}"
-            tools:text="Banana" />
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/text_view_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#000"
+                android:textSize="16sp"
+                android:text="@{`Nome: ` + people.name}"
+                tools:text="Nome: X" />
+
+            <TextView
+                android:id="@+id/text_view_height"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#000"
+                android:textSize="16sp"
+                android:text="@{`Altura: ` + people.height}"
+                tools:text="Altura: X" />
+
+            <TextView
+                android:id="@+id/text_view_gender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#000"
+                android:textSize="16sp"
+                android:text="@{`Gênero: ` + people.gender}"
+                tools:text="Gênero: X" />
+
+            <TextView
+                android:id="@+id/text_view_weight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#000"
+                android:textSize="16sp"
+                android:text="@{`Peso: ` + people.mass}"
+                tools:text="Peso: Y" />
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/image_view_favorite"

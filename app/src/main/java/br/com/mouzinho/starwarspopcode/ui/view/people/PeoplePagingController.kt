@@ -30,7 +30,7 @@ class PeoplePagingController @Inject constructor(
         } else {
             PeopleBindingModel_()
                 .id(item.id)
-                .name("$currentPosition: ${item.name}")
+                .people(item)
                 .favorited(item.favorite)
                 .onFavoriteClickListener(View.OnClickListener { onFavoriteClick(item) })
                 .onViewClickListener(View.OnClickListener { onViewClick(item) })

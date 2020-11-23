@@ -49,14 +49,14 @@ class PeopleDetailsFragment : Fragment(), Navigable {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu.clear()
         inflater.inflate(R.menu.menu_favorite, menu)
+        favoriteItem = menu.findItem(R.id.action_favorite)
+        updateFavoriteIcon(people.favorite)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_favorite) {
-            favoriteItem = item
+        if (item.itemId == R.id.action_favorite)
             return consume { viewModel.updateFavorite(people) }
-        }
         return super.onOptionsItemSelected(item)
     }
 
@@ -71,15 +71,7 @@ class PeopleDetailsFragment : Fragment(), Navigable {
                 awaitAll(
                     async {
                         viewModel.peopleDetails.collect { people ->
-                            textViewName.text = people.name
-                            textViewBirth.text = people.birthYear
-                            textViewHair.text = people.hairColor
-                            textViewGender.text = people.gender
-                            textViewHeight.text = people.height
-                            textViewMass.text = people.mass
-                            textViewSkin.text = people.skinColor
-                            textViewHomeland.text = people.planet
-                            textViewSpecie.text = people.speciesNames
+                            this@run.people = people
                             progressView.isVisible = false
                         }
                     },
@@ -90,12 +82,16 @@ class PeopleDetailsFragment : Fragment(), Navigable {
     }
 
     private fun onFavoriteUpdated(favorited: Boolean) {
-        favoriteItem?.setIcon(if (favorited) R.drawable.ic_star_filled else R.drawable.ic_star_border)
+        updateFavoriteIcon(favorited)
         Toast.makeText(
             requireContext(),
             if (favorited) R.string.favorite_saved_msg else R.string.favorite_removed_msg,
             Toast.LENGTH_SHORT
         ).show()
+    }
+
+    private fun updateFavoriteIcon(favorited: Boolean) {
+        favoriteItem?.setIcon(if (favorited) R.drawable.ic_star_filled else R.drawable.ic_star_border)
     }
 
     companion object {

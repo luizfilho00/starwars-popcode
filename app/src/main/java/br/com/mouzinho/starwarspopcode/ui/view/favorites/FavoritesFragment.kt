@@ -60,7 +60,7 @@ class FavoritesFragment : Fragment(), Navigable {
                 favorites.forEach { favoritePeople ->
                     people {
                         id(favoritePeople.id)
-                        name(favoritePeople.name)
+                        people(favoritePeople)
                         favorited(true)
                         onFavoriteClickListener(View.OnClickListener { onRemoveFavorite(favoritePeople) })
                         onViewClickListener(View.OnClickListener { onGoToDetails(favoritePeople) })
