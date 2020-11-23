@@ -35,7 +35,7 @@ class PeopleViewModel @ViewModelInject constructor(
 
     val peopleLiveData: LiveData<PagedList<People>> =
         LivePagedListBuilder(
-            peopleDao.getAllPeople().map { it.toPeople() },
+            pagingDataSource,
             PagedList.Config.Builder().setEnablePlaceholders(false).setPageSize(10).build()
         ).apply {
             setBoundaryCallback(PeopleBoundaryCallback(viewModelScope, loadingPublisher, apiService, peopleDao, remoteKeyDao))
@@ -50,6 +50,6 @@ class PeopleViewModel @ViewModelInject constructor(
 
     fun onSearch(text: String) {
         pagingDataSource.query = text
-//        pagingSource.invalidate()
+        pagingDataSource.invalidate()
     }
 }

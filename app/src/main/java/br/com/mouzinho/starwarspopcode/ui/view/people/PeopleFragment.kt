@@ -6,12 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import br.com.mouzinho.starwarspopcode.R
 import br.com.mouzinho.starwarspopcode.databinding.FragmentPeopleEpoxyBinding
 import br.com.mouzinho.starwarspopcode.domain.entity.People
 import br.com.mouzinho.starwarspopcode.ui.navigation.Navigator
+import br.com.mouzinho.starwarspopcode.ui.view.MainViewModel
 import br.com.mouzinho.starwarspopcode.ui.view.details.PeopleDetailsFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.async
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.collect
 class PeopleFragment : Fragment() {
     private var binding: FragmentPeopleEpoxyBinding? = null
     private val viewModel by viewModels<PeopleViewModel>()
+    private val activityViewModel by activityViewModels<MainViewModel>()
     private val epoxyController by lazy { PeoplePagingController(::onPeopleClick, ::onFavoriteClick) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -59,7 +62,8 @@ class PeopleFragment : Fragment() {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-                }
+                },
+                async { activityViewModel.searchText.collect { viewModel.onSearch(it) } }
             )
         }
     }
