@@ -4,6 +4,7 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import br.com.mouzinho.starwarspopcode.domain.entity.People
 import br.com.mouzinho.starwarspopcode.domain.repository.PeopleRepository
 import br.com.mouzinho.starwarspopcode.domain.useCase.UpdateFavorite
 import br.com.mouzinho.starwarspopcode.ui.util.DispatcherProvider
@@ -11,7 +12,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class FavoritesViewModel @ViewModelInject constructor(
-    private val repository: PeopleRepository,
+    repository: PeopleRepository,
     private val dispatcherProvider: DispatcherProvider,
     private val updateFavorite: UpdateFavorite
 ) : ViewModel() {
@@ -21,7 +22,10 @@ class FavoritesViewModel @ViewModelInject constructor(
     private val favoritesFlow = repository.loadAllFavorites().asFlow()
     private val initialState = FavoritesViewState(
         favorites = emptyList(),
-        isLoading = true
+        isLoading = true,
+        showFavoriteRemovedMessage = false,
+        favoriteRemovedMessage = "",
+        savedAsFavorite = null
     )
 
     init {
@@ -34,21 +38,34 @@ class FavoritesViewModel @ViewModelInject constructor(
 
     private fun reduceState(action: FavoritesViewAction) {
         when (action) {
-            is FavoritesViewAction.RemoveFavorite -> {
-                viewModelScope.launch(dispatcherProvider.io()) {
-                    updateFavorite.execute(action.people)
-                    emitFavorites()
-                }
-            }
-            is FavoritesViewAction.Search -> viewModelScope.launch(dispatcherProvider.io()) {
-                favoritesFlow.collectLatest { favorites ->
-                    _viewState.emit(
-                        initialState.copy(
-                            favorites = favorites.filter { it.name.contains(action.text, true) },
-                            isLoading = false
-                        )
+            is FavoritesViewAction.RemoveFavorite -> removeFavorite(action.people)
+            is FavoritesViewAction.Search -> filterFavoritesByText(action.text)
+        }
+    }
+
+    private fun removeFavorite(people: People) {
+        viewModelScope.launch(dispatcherProvider.io()) {
+            val favoriteResult = updateFavorite.execute(people)
+            _viewState.emit(
+                initialState.copy(
+                    showFavoriteRemovedMessage = true,
+                    favoriteRemovedMessage = favoriteResult.message,
+                    savedAsFavorite = favoriteResult.savedAsFavorite
+                )
+            )
+            emitFavorites()
+        }
+    }
+
+    private fun filterFavoritesByText(text: String) {
+        viewModelScope.launch(dispatcherProvider.io()) {
+            favoritesFlow.collectLatest { favorites ->
+                _viewState.emit(
+                    initialState.copy(
+                        favorites = favorites.filter { it.name.contains(text, true) },
+                        isLoading = false
                     )
-                }
+                )
             }
         }
     }

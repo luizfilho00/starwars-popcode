@@ -23,8 +23,10 @@ class PeopleDetailsViewModel @ViewModelInject constructor(
     private val _viewState by lazy { MutableSharedFlow<PeopleDetailsViewState>() }
     private val initialState = PeopleDetailsViewState(
         isLoading = true,
-        favorited = null,
-        peopleWithAllInformations = null
+        showFavoriteSaveMessage = false,
+        favoriteSaveMessage = "",
+        peopleWithAllInformations = null,
+        savedAsFavorite = null
     )
 
     fun updateViewState(action: PeopleDetailsViewAction) {
@@ -55,8 +57,14 @@ class PeopleDetailsViewModel @ViewModelInject constructor(
             _viewState.emit(initialState.copy(isLoading = true))
         }
         viewModelScope.launch(dispatcherProvider.io()) {
-            val favoriteSaved = updateFavorite.execute(people)
-            _viewState.emit(initialState.copy(isLoading = false, favorited = favoriteSaved))
+            val favoriteResult = updateFavorite.execute(people)
+            _viewState.emit(
+                initialState.copy(
+                    showFavoriteSaveMessage = true,
+                    favoriteSaveMessage = favoriteResult.message,
+                    savedAsFavorite = favoriteResult.savedAsFavorite
+                )
+            )
         }
     }
 

@@ -11,4 +11,7 @@ class DefaultStringResource @Inject constructor(
 ) : StringResource {
 
     override val toolbarTitle: String get() = appContext.getString(R.string.app_name)
+    override val defaultErrorMessage: String get() = appContext.getString(R.string.default_error)
+    override val removedFavoriteMessage: String get() = appContext.getString(R.string.favorite_removed_msg)
+    override val savedFavoriteMessage: String get() = appContext.getString(R.string.favorite_saved_msg)
 }

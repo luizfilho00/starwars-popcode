@@ -31,7 +31,9 @@ class PeopleViewModel @ViewModelInject constructor(
         isLoading = true,
         peopleList = null,
         peopleListUpdated = false,
-        favoriteSaved = null
+        showFavoriteSaveMessage = false,
+        savedAsFavorite = null,
+        favoriteSaveMessage = ""
     )
 
     init {
@@ -63,8 +65,14 @@ class PeopleViewModel @ViewModelInject constructor(
         when (action) {
             is PeopleViewAction.Search -> onSearch(action.text)
             is PeopleViewAction.UpdateFavorite -> viewModelScope.launch(dispatcherProvider.io()) {
-                val favoriteSaved = updateFavorite.execute(action.people)
-                _viewState.emit(initialState.copy(favoriteSaved = favoriteSaved))
+                val favoriteResult = updateFavorite.execute(action.people)
+                _viewState.emit(
+                    initialState.copy(
+                        showFavoriteSaveMessage = true,
+                        favoriteSaveMessage = favoriteResult.message,
+                        savedAsFavorite = favoriteResult.savedAsFavorite
+                    )
+                )
             }
             is PeopleViewAction.ToggleLoadingVisiblity -> viewModelScope.launch {
                 _viewState.emit(initialState.copy(isLoading = action.visible))

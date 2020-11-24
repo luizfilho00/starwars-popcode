@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">Star Wars - Popcode</string>
     <string name="ok">OK</string>
-    <string name="you_dont_have_favorites_yet">You dont have favorites yet!</string>
+    <string name="you_have_no_favorites_yet">You have no favorites yet!</string>
     <string name="favorite_saved_msg">May the force be with you</string>
     <string name="favorite_removed_msg">Wait for my revenge young padawan</string>
     <string name="error_message">Only at the end do you realize the power of the Dark Side.</string>
+    <string name="default_error">We\'ve find some erros on the force, please try again later.</string>
 </resources>

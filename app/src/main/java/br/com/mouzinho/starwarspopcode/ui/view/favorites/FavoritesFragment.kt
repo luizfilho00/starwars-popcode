@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import br.com.mouzinho.starwarspopcode.R
 import br.com.mouzinho.starwarspopcode.databinding.FragmentFavoritesBinding
 import br.com.mouzinho.starwarspopcode.domain.entity.People
 import br.com.mouzinho.starwarspopcode.people
@@ -63,6 +62,8 @@ class FavoritesFragment : Fragment(), Navigable {
         binding?.run {
             layoutEmpty.isVisible = state.favorites.isEmpty()
             progressView.isVisible = state.isLoading
+            if (state.showFavoriteRemovedMessage)
+                Toast.makeText(requireContext(), state.favoriteRemovedMessage, Toast.LENGTH_LONG).show()
             if (state.favorites.isNotEmpty())
                 onFavoritesReceived(state.favorites)
         }
@@ -87,7 +88,6 @@ class FavoritesFragment : Fragment(), Navigable {
 
     private fun onRemoveFavorite(people: People) {
         viewModel.updateViewState(FavoritesViewAction.RemoveFavorite(people))
-        Toast.makeText(requireContext(), R.string.favorite_removed_msg, Toast.LENGTH_SHORT).show()
     }
 
     private fun onGoToDetails(people: People) {

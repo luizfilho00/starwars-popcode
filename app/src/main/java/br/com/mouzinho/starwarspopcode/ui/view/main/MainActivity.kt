@@ -101,9 +101,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun onPushAction(action: Navigator.NavAction.Push) {
         supportFragmentManager.beginTransaction()
+            .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_right)
             .add(binding.frameLayoutContainer.id, action.fragment)
             .addToBackStack(action.fragment.javaClass.simpleName)
-            .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_right)
             .commit()
     }
 

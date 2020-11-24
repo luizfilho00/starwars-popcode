@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import br.com.mouzinho.starwarspopcode.R
 import br.com.mouzinho.starwarspopcode.databinding.FragmentPeopleEpoxyBinding
 import br.com.mouzinho.starwarspopcode.domain.entity.People
 import br.com.mouzinho.starwarspopcode.ui.base.ScrollableFragment
@@ -67,13 +66,8 @@ class PeopleFragment : Fragment(), ScrollableFragment {
     private fun renderState(state: PeopleViewState) {
         if (state.peopleListUpdated)
             epoxyController.submitList(state.peopleList)
-        if (state.favoriteSaved != null) {
-            Toast.makeText(
-                requireContext(),
-                if (state.favoriteSaved) R.string.favorite_saved_msg else R.string.favorite_removed_msg,
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+        if (state.showFavoriteSaveMessage)
+            Toast.makeText(requireContext(), state.favoriteSaveMessage, Toast.LENGTH_LONG).show()
         epoxyController.isLoading = state.isLoading
     }
 

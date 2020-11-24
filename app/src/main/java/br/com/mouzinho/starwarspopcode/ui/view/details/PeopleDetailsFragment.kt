@@ -71,14 +71,10 @@ class PeopleDetailsFragment : Fragment(), Navigable {
     }
 
     private fun render(state: PeopleDetailsViewState) {
-        if (state.favorited != null) {
-            updateFavoriteIcon(state.favorited)
-            Toast.makeText(
-                requireContext(),
-                if (state.favorited) R.string.favorite_saved_msg else R.string.favorite_removed_msg,
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+        if (state.savedAsFavorite != null)
+            updateFavoriteIcon(state.savedAsFavorite)
+        if (state.showFavoriteSaveMessage)
+            Toast.makeText(requireContext(), state.favoriteSaveMessage, Toast.LENGTH_LONG).show()
         binding?.run {
             progressView.isVisible = state.isLoading
             if (state.peopleWithAllInformations != null)

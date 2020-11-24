@@ -4,6 +4,8 @@ import br.com.mouzinho.starwarspopcode.domain.entity.People
 
 data class PeopleDetailsViewState(
     val isLoading: Boolean,
-    val favorited: Boolean?,
-    val peopleWithAllInformations: People?
+    val showFavoriteSaveMessage: Boolean,
+    val favoriteSaveMessage: String,
+    val peopleWithAllInformations: People?,
+    val savedAsFavorite: Boolean?,
 )

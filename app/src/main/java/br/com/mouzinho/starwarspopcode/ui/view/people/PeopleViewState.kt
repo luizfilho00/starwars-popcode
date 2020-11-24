@@ -7,5 +7,7 @@ data class PeopleViewState(
     val isLoading: Boolean,
     val peopleListUpdated: Boolean,
     val peopleList: PagedList<People>?,
-    val favoriteSaved: Boolean?
+    val showFavoriteSaveMessage: Boolean,
+    val favoriteSaveMessage: String,
+    val savedAsFavorite: Boolean?,
 )
