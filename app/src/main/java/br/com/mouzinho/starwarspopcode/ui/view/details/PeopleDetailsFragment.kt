@@ -29,6 +29,7 @@ class PeopleDetailsFragment : Fragment(), Navigable {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentPeopleDetailsBinding.inflate(inflater, container, false)
+        binding?.lifecycleOwner = viewLifecycleOwner
         setHasOptionsMenu(true)
         return binding?.root
     }
@@ -36,8 +37,8 @@ class PeopleDetailsFragment : Fragment(), Navigable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupUi()
-        viewModel.updateViewState(PeopleDetailsViewAction.LoadDetails(people))
         subscribeUi()
+        viewModel.updateViewState(PeopleDetailsViewAction.LoadDetails(people))
     }
 
     override fun onDestroyView() {

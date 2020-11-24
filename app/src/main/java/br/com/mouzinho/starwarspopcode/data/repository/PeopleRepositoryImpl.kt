@@ -19,7 +19,7 @@ class PeopleRepositoryImpl @Inject constructor(
     }
 
     override suspend fun loadSpecieName(url: String): String {
-        return ""
+        return apiService.getSpecieName(url).name ?: ""
     }
 
     override suspend fun updatePeople(people: People) {

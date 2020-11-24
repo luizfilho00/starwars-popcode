@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="people"
             type="br.com.mouzinho.starwarspopcode.domain.entity.People" />
@@ -29,9 +30,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
+                    android:text="@{`Nome: ` + people.name}"
                     android:textColor="#000"
                     android:textSize="16sp"
-                    android:text="@{`Nome: ` + people.name}"
                     tools:text="Banana" />
 
                 <TextView
@@ -39,9 +40,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
+                    android:text="@{`Altura: ` + people.height}"
                     android:textColor="#000"
                     android:textSize="16sp"
-                    android:text="@{`Altura: ` + people.height}"
                     tools:text="Banana" />
 
                 <TextView
@@ -49,9 +50,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
+                    android:text="@{`Cor da pele: ` + people.skinColor}"
                     android:textColor="#000"
                     android:textSize="16sp"
-                    android:text="@{`Cor da pele: ` + people.skinColor}"
                     tools:text="Banana" />
 
                 <TextView
@@ -59,9 +60,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
+                    android:text="@{`Peso: ` + people.mass}"
                     android:textColor="#000"
                     android:textSize="16sp"
-                    android:text="@{`Peso: ` + people.mass}"
                     tools:text="Banana" />
 
                 <TextView
@@ -69,9 +70,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
+                    android:text="@{`Cor do cabelo: ` + people.hairColor}"
                     android:textColor="#000"
                     android:textSize="16sp"
-                    android:text="@{`Cor do cabelo: ` + people.hairColor}"
                     tools:text="Banana" />
 
                 <TextView
@@ -79,9 +80,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
+                    android:text="@{`Nascimento: ` + people.birthYear}"
                     android:textColor="#000"
                     android:textSize="16sp"
-                    android:text="@{`Nascimento: ` + people.birthYear}"
                     tools:text="Banana" />
 
                 <TextView
@@ -89,9 +90,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
+                    android:text="@{`Gênero: ` + people.gender}"
                     android:textColor="#000"
                     android:textSize="16sp"
-                    android:text="@{`Gênero: ` + people.gender}"
                     tools:text="Banana" />
 
                 <TextView
@@ -99,9 +100,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
+                    android:text="@{`Planeta natal: ` + people.planetName}"
                     android:textColor="#000"
                     android:textSize="16sp"
-                    android:text="@{`Planeta natal: ` + people.planetUrl}"
                     tools:text="Banana" />
 
                 <TextView
@@ -109,18 +110,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
+                    android:text="@{`Espécie: ` + people.speciesNames}"
                     android:textColor="#000"
                     android:textSize="16sp"
-                    android:text="@{`Espécie: ` + people.speciesNames}"
                     tools:text="Banana" />
             </LinearLayout>
 
             <FrameLayout
                 android:id="@+id/progress_view"
                 android:layout_width="match_parent"
-                android:visibility="gone"
                 android:layout_height="match_parent"
-                android:background="#fff">
+                android:background="#fff"
+                android:visibility="visible"
+                tools:visibility="gone">
 
                 <ProgressBar
                     android:layout_width="wrap_content"

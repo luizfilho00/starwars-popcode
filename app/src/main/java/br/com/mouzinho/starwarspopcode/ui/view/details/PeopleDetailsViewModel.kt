@@ -7,11 +7,13 @@ import br.com.mouzinho.starwarspopcode.domain.entity.People
 import br.com.mouzinho.starwarspopcode.domain.repository.PeopleRepository
 import br.com.mouzinho.starwarspopcode.domain.useCase.UpdateFavorite
 import br.com.mouzinho.starwarspopcode.ui.util.DispatcherProvider
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class PeopleDetailsViewModel @ViewModelInject constructor(
     private val dispatcherProvider: DispatcherProvider,
@@ -27,22 +29,17 @@ class PeopleDetailsViewModel @ViewModelInject constructor(
         peopleWithAllInformations = null
     )
 
-    init {
-        viewModelScope.launch {
-            _viewState.emit(initialState)
-        }
-    }
-
     fun updateViewState(action: PeopleDetailsViewAction) {
         when (action) {
             is PeopleDetailsViewAction.LoadDetails -> viewModelScope.launch(dispatcherProvider.io()) {
                 val speciesNames = loadSpecieNames(action.people)
+                val planetName = peopleRepository.loadPlanetName(action.people.planetUrl)
                 _viewState.emit(
                     initialState.copy(
                         isLoading = false,
                         peopleWithAllInformations = action.people.copy(
                             speciesNames = speciesNames,
-                            planetName = peopleRepository.loadPlanetName(action.people.planetUrl)
+                            planetName = planetName
                         )
                     )
                 )
@@ -60,10 +57,12 @@ class PeopleDetailsViewModel @ViewModelInject constructor(
     }
 
     private suspend fun loadSpecieNames(people: People): String {
-        return if (people.species.isNotEmpty())
-            people.species.reduce { acc, s ->
-                "${peopleRepository.loadSpecieName(acc)}, ${peopleRepository.loadSpecieName(s)}"
-            }
-        else people.speciesNames
+        var speciesNames = ""
+        people.species.forEach { url ->
+            speciesNames += "${peopleRepository.loadSpecieName(url)}, "
+        }
+        return if (speciesNames.isNotEmpty()) {
+            speciesNames.substring(0, speciesNames.lastIndexOf(",")).trimEnd()
+        } else people.speciesNames
     }
 }
