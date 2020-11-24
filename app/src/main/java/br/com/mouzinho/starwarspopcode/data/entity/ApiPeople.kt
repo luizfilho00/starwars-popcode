@@ -39,7 +39,7 @@ data class ApiPeople(
         skinColor = if (skinColor.isNullOrEmpty()) UNKNOWN else skinColor,
         birthYear = if (birthYear.isNullOrEmpty()) UNKNOWN else birthYear,
         gender = if (gender.isNullOrEmpty()) UNKNOWN else gender,
-        planet = homeworld ?: "",
+        planetUrl = homeworld ?: "",
         species = species ?: emptyList()
     )
 

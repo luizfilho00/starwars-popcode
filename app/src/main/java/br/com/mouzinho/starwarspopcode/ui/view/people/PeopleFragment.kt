@@ -14,8 +14,9 @@ import br.com.mouzinho.starwarspopcode.databinding.FragmentPeopleEpoxyBinding
 import br.com.mouzinho.starwarspopcode.domain.entity.People
 import br.com.mouzinho.starwarspopcode.ui.base.ScrollableFragment
 import br.com.mouzinho.starwarspopcode.ui.navigation.Navigator
-import br.com.mouzinho.starwarspopcode.ui.view.MainViewModel
 import br.com.mouzinho.starwarspopcode.ui.view.details.PeopleDetailsFragment
+import br.com.mouzinho.starwarspopcode.ui.view.main.MainViewModel
+import br.com.mouzinho.starwarspopcode.ui.view.main.MainViewState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -55,26 +56,33 @@ class PeopleFragment : Fragment(), ScrollableFragment {
     }
 
     private fun subscribeUi() {
-        viewModel.peopleLiveData.observe(viewLifecycleOwner) { epoxyController.submitList(it) }
         lifecycleScope.launchWhenStarted {
             awaitAll(
-                async { viewModel.loadingObservable.collect { epoxyController.isLoading = it } },
-                async {
-                    viewModel.favoriteObservable.collect { favorited ->
-                        Toast.makeText(
-                            requireContext(),
-                            if (favorited) R.string.favorite_saved_msg else R.string.favorite_removed_msg,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                },
-                async { activityViewModel.searchText.collect { viewModel.onSearch(it) } }
+                async { viewModel.viewState.collect(::renderState) },
+                async { activityViewModel.mainViewState.collect(::onMainViewStateUpdate) }
             )
         }
     }
 
+    private fun renderState(state: PeopleViewState) {
+        if (state.peopleListUpdated)
+            epoxyController.submitList(state.peopleList)
+        if (state.favoriteSaved != null) {
+            Toast.makeText(
+                requireContext(),
+                if (state.favoriteSaved) R.string.favorite_saved_msg else R.string.favorite_removed_msg,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        epoxyController.isLoading = state.isLoading
+    }
+
     private fun onFavoriteClick(people: People) {
-        viewModel.updateFavorite(people)
+        viewModel.updateViewState(PeopleViewAction.UpdateFavorite(people))
+    }
+
+    private fun onMainViewStateUpdate(mainViewState: MainViewState) {
+        viewModel.updateViewState(PeopleViewAction.Search(mainViewState.searchText))
     }
 
     private fun setupEpoxy() {

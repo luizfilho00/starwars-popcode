@@ -14,15 +14,14 @@ import br.com.mouzinho.starwarspopcode.databinding.FragmentPeopleDetailsBinding
 import br.com.mouzinho.starwarspopcode.domain.entity.People
 import br.com.mouzinho.starwarspopcode.ui.navigation.Navigable
 import br.com.mouzinho.starwarspopcode.ui.util.consume
-import br.com.mouzinho.starwarspopcode.ui.view.MainViewModel
+import br.com.mouzinho.starwarspopcode.ui.view.main.MainViewAction
+import br.com.mouzinho.starwarspopcode.ui.view.main.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class PeopleDetailsFragment : Fragment(), Navigable {
-    private val viewModel by viewModels<PeopleDetailViewModel>()
+    private val viewModel by viewModels<PeopleDetailsViewModel>()
     private val activityViewModel by activityViewModels<MainViewModel>()
     private val people: People by lazy { arguments?.getSerializable(PEOPLE_EXTRA) as People }
     private var binding: FragmentPeopleDetailsBinding? = null
@@ -37,7 +36,7 @@ class PeopleDetailsFragment : Fragment(), Navigable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupUi()
-        viewModel.loadDetails(people)
+        viewModel.updateViewState(PeopleDetailsViewAction.LoadDetails(people))
         subscribeUi()
     }
 
@@ -56,38 +55,34 @@ class PeopleDetailsFragment : Fragment(), Navigable {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.action_favorite)
-            return consume { viewModel.updateFavorite(people) }
+            return consume { viewModel.updateViewState(PeopleDetailsViewAction.UpdateFavorite(people)) }
         return super.onOptionsItemSelected(item)
     }
 
     private fun setupUi() {
-        activityViewModel.onTitleChanged(people.name)
+        activityViewModel.updateViewState(MainViewAction.ChangeToolbarTitle(people.name))
     }
 
     private fun subscribeUi() {
-        binding?.run {
-            lifecycleScope.launchWhenStarted {
-                progressView.isVisible = true
-                awaitAll(
-                    async {
-                        viewModel.peopleDetails.collect { people ->
-                            this@run.people = people
-                            progressView.isVisible = false
-                        }
-                    },
-                    async { viewModel.favorited.collect(::onFavoriteUpdated) }
-                )
-            }
+        lifecycleScope.launchWhenStarted {
+            viewModel.viewState.collect(::render)
         }
     }
 
-    private fun onFavoriteUpdated(favorited: Boolean) {
-        updateFavoriteIcon(favorited)
-        Toast.makeText(
-            requireContext(),
-            if (favorited) R.string.favorite_saved_msg else R.string.favorite_removed_msg,
-            Toast.LENGTH_SHORT
-        ).show()
+    private fun render(state: PeopleDetailsViewState) {
+        if (state.favorited != null) {
+            updateFavoriteIcon(state.favorited)
+            Toast.makeText(
+                requireContext(),
+                if (state.favorited) R.string.favorite_saved_msg else R.string.favorite_removed_msg,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        binding?.run {
+            progressView.isVisible = state.isLoading
+            if (state.peopleWithAllInformations != null)
+                this@run.people = state.peopleWithAllInformations
+        }
     }
 
     private fun updateFavoriteIcon(favorited: Boolean) {

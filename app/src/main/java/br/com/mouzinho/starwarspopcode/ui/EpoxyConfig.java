@@ -1,4 +1,4 @@
-package br.com.mouzinho.starwarspopcode.ui.view;
+package br.com.mouzinho.starwarspopcode.ui;
 
 import com.airbnb.epoxy.EpoxyDataBindingPattern;
 

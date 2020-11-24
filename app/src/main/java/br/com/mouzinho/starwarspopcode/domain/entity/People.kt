@@ -11,9 +11,10 @@ data class People(
     val skinColor: String,
     val birthYear: String,
     val gender: String,
-    val planet: String,
+    val planetUrl: String,
     val species: List<String>,
     val speciesNames: String = UNKOWN,
+    val planetName: String = UNKOWN,
     var favorite: Boolean = false
 ) : Serializable {
 

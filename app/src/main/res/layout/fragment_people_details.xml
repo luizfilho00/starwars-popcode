@@ -101,7 +101,7 @@
                     android:padding="16dp"
                     android:textColor="#000"
                     android:textSize="16sp"
-                    android:text="@{`Planeta natal: ` + people.planet}"
+                    android:text="@{`Planeta natal: ` + people.planetUrl}"
                     tools:text="Banana" />
 
                 <TextView

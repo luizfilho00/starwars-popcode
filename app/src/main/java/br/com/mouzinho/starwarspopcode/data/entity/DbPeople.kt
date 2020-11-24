@@ -30,7 +30,7 @@ data class DbPeople(
         skinColor = skinColor,
         birthYear = birthYear,
         gender = gender,
-        planet = planetUrl,
+        planetUrl = planetUrl,
         species = speciesUrl,
         favorite = isFavorite
     )
@@ -45,7 +45,7 @@ data class DbPeople(
             skinColor = people.skinColor,
             birthYear = people.birthYear,
             gender = people.gender,
-            planetUrl = people.planet,
+            planetUrl = people.planetUrl,
             speciesUrl = people.species,
             createdAt = Date().time,
             isFavorite = people.favorite

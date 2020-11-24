@@ -4,13 +4,10 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
-import br.com.mouzinho.starwarspopcode.domain.entity.People
 import br.com.mouzinho.starwarspopcode.domain.repository.PeopleRepository
 import br.com.mouzinho.starwarspopcode.domain.useCase.UpdateFavorite
 import br.com.mouzinho.starwarspopcode.ui.util.DispatcherProvider
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class FavoritesViewModel @ViewModelInject constructor(
@@ -18,38 +15,49 @@ class FavoritesViewModel @ViewModelInject constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val updateFavorite: UpdateFavorite
 ) : ViewModel() {
-    val favorites by lazy { _favorites.asSharedFlow() }
+    val viewState by lazy { _viewState.asSharedFlow().shareIn(viewModelScope, SharingStarted.Lazily) }
 
-    private val _favorites by lazy { MutableSharedFlow<List<People>>() }
-    private val favoritesLiveData by lazy { repository.loadAllFavorites() }
+    private val _viewState by lazy { MutableSharedFlow<FavoritesViewState>() }
+    private val favoritesFlow = repository.loadAllFavorites().asFlow()
+    private val initialState = FavoritesViewState(
+        favorites = emptyList(),
+        isLoading = true
+    )
 
     init {
-        reloadFavorites()
+        emitFavorites()
     }
 
-    suspend fun search(text: String) =
-        viewModelScope.launch {
-            favoritesLiveData
-                .asFlow()
-                .collectLatest {
-                    _favorites.emit(it.filter { it.name.contains(text, true) })
-                }
-        }
+    fun updateViewState(action: FavoritesViewAction) {
+        reduceState(action)
+    }
 
-    fun onRemoveFavorite(people: People) {
+    private fun reduceState(action: FavoritesViewAction) {
+        when (action) {
+            is FavoritesViewAction.RemoveFavorite -> {
+                viewModelScope.launch(dispatcherProvider.io()) {
+                    updateFavorite.execute(action.people)
+                    emitFavorites()
+                }
+            }
+            is FavoritesViewAction.Search -> viewModelScope.launch(dispatcherProvider.io()) {
+                favoritesFlow.collectLatest { favorites ->
+                    _viewState.emit(
+                        initialState.copy(
+                            favorites = favorites.filter { it.name.contains(action.text, true) },
+                            isLoading = false
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun emitFavorites() {
         viewModelScope.launch(dispatcherProvider.io()) {
-            updateFavorite.execute(people)
-            reloadFavorites()
-        }
-    }
-
-    private fun reloadFavorites() {
-        viewModelScope.launch {
-            favoritesLiveData
-                .asFlow()
-                .collectLatest {
-                    _favorites.emit(it)
-                }
+            favoritesFlow.collectLatest { favorites ->
+                _viewState.emit(initialState.copy(favorites = favorites, isLoading = false))
+            }
         }
     }
 }

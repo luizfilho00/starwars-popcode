@@ -1,4 +1,4 @@
-package br.com.mouzinho.starwarspopcode.ui.view
+package br.com.mouzinho.starwarspopcode.ui.view.main
 
 import android.os.Bundle
 import android.view.Menu
@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?) = false
             override fun onQueryTextChange(newText: String?): Boolean {
-                newText?.let { viewModel.onSearch(it) }
+                newText?.let { viewModel.updateViewState(MainViewAction.Search(it)) }
                 return false
             }
         })
@@ -149,8 +149,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun subscribeUi() {
         lifecycleScope.launchWhenStarted {
-            viewModel.title.collect { supportActionBar?.title = it }
+            viewModel.mainViewState.collect(::render)
         }
+    }
+
+    private fun render(state: MainViewState) {
+        supportActionBar?.title = state.toolbarTitle
     }
 
     companion object {

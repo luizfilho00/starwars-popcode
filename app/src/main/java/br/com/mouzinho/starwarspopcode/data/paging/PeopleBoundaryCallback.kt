@@ -7,15 +7,14 @@ import br.com.mouzinho.starwarspopcode.data.entity.DbPeople
 import br.com.mouzinho.starwarspopcode.data.entity.DbRemoteKey
 import br.com.mouzinho.starwarspopcode.data.network.ApiService
 import br.com.mouzinho.starwarspopcode.domain.entity.People
-import br.com.mouzinho.starwarspopcode.ui.view.people.PeoplePagingController
+import br.com.mouzinho.starwarspopcode.ui.view.people.PeopleViewAction
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
 class PeopleBoundaryCallback(
     private val scope: CoroutineScope,
-    private val loadingObservable: MutableSharedFlow<Boolean>,
+    private val stateListener: (PeopleViewAction) -> Unit,
     private val apiService: ApiService,
     private val peopleDao: DbPeopleDao,
     private val remoteKeyDao: DbRemoteKeyDao
@@ -26,17 +25,17 @@ class PeopleBoundaryCallback(
         if (loading.get()) return
         scope.launch {
             loading.set(true)
-            loadingObservable.emit(true)
+            stateListener(PeopleViewAction.ToggleLoadingVisiblity(true))
             var currentPage = 1
             val response = try {
                 apiService.getPeople(currentPage)
             } catch (ex: Exception) {
-                loadingObservable.emit(false)
+                stateListener(PeopleViewAction.ToggleLoadingVisiblity(false))
                 loading.set(false)
                 null
             }
             if (response?.results != null) {
-                loadingObservable.emit(false)
+                stateListener(PeopleViewAction.ToggleLoadingVisiblity(false))
                 remoteKeyDao.insertRemoteKey(DbRemoteKey(0, ++currentPage))
                 peopleDao.insertAllPeople(response.results.map { DbPeople.fromPeople(it.toPeople()) })
                 loading.set(false)
@@ -48,18 +47,18 @@ class PeopleBoundaryCallback(
         if (loading.get()) return
         scope.launch {
             loading.set(true)
-            loadingObservable.emit(true)
+            stateListener(PeopleViewAction.ToggleLoadingVisiblity(true))
             var currentPage = remoteKeyDao.getAllRemoteKey().firstOrNull()?.nextKey
             if (currentPage != null) {
                 val response = try {
                     apiService.getPeople(currentPage)
                 } catch (ex: Exception) {
-                    loadingObservable.emit(false)
+                    stateListener(PeopleViewAction.ToggleLoadingVisiblity(false))
                     loading.set(false)
                     null
                 }
                 if (response?.results != null) {
-                    loadingObservable.emit(false)
+                    stateListener(PeopleViewAction.ToggleLoadingVisiblity(false))
                     remoteKeyDao.insertRemoteKey(DbRemoteKey(0, ++currentPage))
                     peopleDao.insertAllPeople(response.results.map { DbPeople.fromPeople(it.toPeople()) })
                     loading.set(false)

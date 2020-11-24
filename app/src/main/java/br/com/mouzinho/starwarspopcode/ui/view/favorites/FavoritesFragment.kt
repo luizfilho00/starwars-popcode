@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -15,8 +16,9 @@ import br.com.mouzinho.starwarspopcode.domain.entity.People
 import br.com.mouzinho.starwarspopcode.people
 import br.com.mouzinho.starwarspopcode.ui.navigation.Navigable
 import br.com.mouzinho.starwarspopcode.ui.navigation.Navigator
-import br.com.mouzinho.starwarspopcode.ui.view.MainViewModel
 import br.com.mouzinho.starwarspopcode.ui.view.details.PeopleDetailsFragment
+import br.com.mouzinho.starwarspopcode.ui.view.main.MainViewModel
+import br.com.mouzinho.starwarspopcode.ui.view.main.MainViewState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -47,9 +49,22 @@ class FavoritesFragment : Fragment(), Navigable {
     private fun subscribeUi() {
         lifecycleScope.launchWhenStarted {
             awaitAll(
-                async { viewModel.favorites.collect(::onFavoritesReceived) },
-                async { activityViewModel.searchText.collect { viewModel.search(it) } }
+                async { viewModel.viewState.collect(::render) },
+                async { activityViewModel.mainViewState.collect(::onMainViewStateUpdate) }
             )
+        }
+    }
+
+    private fun onMainViewStateUpdate(state: MainViewState) {
+        viewModel.updateViewState(FavoritesViewAction.Search(state.searchText))
+    }
+
+    private fun render(state: FavoritesViewState) {
+        binding?.run {
+            layoutEmpty.isVisible = state.favorites.isEmpty()
+            progressView.isVisible = state.isLoading
+            if (state.favorites.isNotEmpty())
+                onFavoritesReceived(state.favorites)
         }
     }
 
@@ -71,7 +86,7 @@ class FavoritesFragment : Fragment(), Navigable {
     }
 
     private fun onRemoveFavorite(people: People) {
-        viewModel.onRemoveFavorite(people)
+        viewModel.updateViewState(FavoritesViewAction.RemoveFavorite(people))
         Toast.makeText(requireContext(), R.string.favorite_removed_msg, Toast.LENGTH_SHORT).show()
     }
 
