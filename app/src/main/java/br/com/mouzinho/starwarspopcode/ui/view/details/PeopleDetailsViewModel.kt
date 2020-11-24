@@ -7,13 +7,11 @@ import br.com.mouzinho.starwarspopcode.domain.entity.People
 import br.com.mouzinho.starwarspopcode.domain.repository.PeopleRepository
 import br.com.mouzinho.starwarspopcode.domain.useCase.UpdateFavorite
 import br.com.mouzinho.starwarspopcode.ui.util.DispatcherProvider
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class PeopleDetailsViewModel @ViewModelInject constructor(
     private val dispatcherProvider: DispatcherProvider,
@@ -31,28 +29,34 @@ class PeopleDetailsViewModel @ViewModelInject constructor(
 
     fun updateViewState(action: PeopleDetailsViewAction) {
         when (action) {
-            is PeopleDetailsViewAction.LoadDetails -> viewModelScope.launch(dispatcherProvider.io()) {
-                val speciesNames = loadSpecieNames(action.people)
-                val planetName = peopleRepository.loadPlanetName(action.people.planetUrl)
-                _viewState.emit(
-                    initialState.copy(
-                        isLoading = false,
-                        peopleWithAllInformations = action.people.copy(
-                            speciesNames = speciesNames,
-                            planetName = planetName
-                        )
+            is PeopleDetailsViewAction.LoadDetails -> loadDetails(action.people)
+            is PeopleDetailsViewAction.UpdateFavorite -> updateFavorite(action.people)
+        }
+    }
+
+    private fun loadDetails(people: People) {
+        viewModelScope.launch(dispatcherProvider.io()) {
+            val speciesNames = loadSpecieNames(people)
+            val planetName = peopleRepository.loadPlanetName(people.planetUrl)
+            _viewState.emit(
+                initialState.copy(
+                    isLoading = false,
+                    peopleWithAllInformations = people.copy(
+                        speciesNames = speciesNames,
+                        planetName = planetName
                     )
                 )
-            }
-            is PeopleDetailsViewAction.UpdateFavorite -> {
-                viewModelScope.launch {
-                    _viewState.emit(initialState.copy(isLoading = true))
-                }
-                viewModelScope.launch(dispatcherProvider.io()) {
-                    val favoriteSaved = updateFavorite.execute(action.people)
-                    _viewState.emit(initialState.copy(isLoading = false, favorited = favoriteSaved))
-                }
-            }
+            )
+        }
+    }
+
+    private fun updateFavorite(people: People) {
+        viewModelScope.launch {
+            _viewState.emit(initialState.copy(isLoading = true))
+        }
+        viewModelScope.launch(dispatcherProvider.io()) {
+            val favoriteSaved = updateFavorite.execute(people)
+            _viewState.emit(initialState.copy(isLoading = false, favorited = favoriteSaved))
         }
     }
 
