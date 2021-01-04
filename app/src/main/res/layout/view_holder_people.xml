@@ -6,7 +6,7 @@
 
         <variable
             name="people"
-            type="br.com.mouzinho.starwarspopcode.domain.entity.People" />
+            type="br.com.mouzinho.starwarspopcode.model.People" />
 
         <variable
             name="favorited"
